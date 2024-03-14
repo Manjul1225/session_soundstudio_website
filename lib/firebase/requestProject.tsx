@@ -2,6 +2,7 @@ import { addDoc, collection } from "firebase/firestore"
 import { db } from "./db"
 
 const requestProject = async (
+  email,
   bandName,
   links,
   projectName,
@@ -10,9 +11,11 @@ const requestProject = async (
   timeframe,
   trackList,
   instruments,
+  pfp,
 ) => {
   try {
     const projectDocRef = await addDoc(collection(db, "requests"), {
+      email,
       bandName,
       links,
       projectName,
@@ -24,6 +27,7 @@ const requestProject = async (
       type: "project",
       createdAt: Date.now(),
       booked: false,
+      pfp,
     })
 
     return projectDocRef
