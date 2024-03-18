@@ -6,7 +6,7 @@ import useIsMobile from "@/hooks/useIsMobile"
 import ClipSpan from "../../../ClipSpan"
 
 const BookedProject = () => {
-  const router = useRouter()
+  const { push, query } = useRouter()
   const { projectName, trackList } = useBookProject()
   const isMobile = useIsMobile()
 
@@ -23,9 +23,9 @@ const BookedProject = () => {
           blurLink="/images/BookProject/success.png"
           containerClasses="w-[200px] aspect-[1/1] !absolute left-[calc(50%-100px)] md:left-[-100px] top-[-140px] md:top-[-70px]"
         />
-        <ClipSpan className="bg-gradient-to-r from-[#FF6A2B] to-[#FF442B] font-urwgeometric_bold text-[18px] leading-[100%] samsungS8:!text-[20px] md:!text-[24px]">
+        <p className="text-[18px] leading-[100%] text-project samsungS8:!text-[20px] md:!text-[24px]">
           {projectName}
-        </ClipSpan>
+        </p>
         <p className="font-urwgeometric text-[12px] text-gray_2 md:text-[14px]">
           Consisting of {trackList.length} tracks:
         </p>
@@ -47,8 +47,7 @@ const BookedProject = () => {
           className="pb-[10px] font-urwgeometric_medium
           text-[32px] leading-[90%] text-gray_1 md:pb-[15px] md:text-[64px]"
         >
-          Your <ClipSpan className="bg-gradient-to-r from-[#FF6A2B] to-[#FF442B]">Project</ClipSpan>{" "}
-          has <br />
+          Your <span className="text-project">Project</span> has <br />
           been submitted.
         </p>
         <p className="font-urwgeometric_medium text-[12px] text-gray_1 samsungS8:text-[14px] xs:text-[16px] md:pt-[1.5vh]">
@@ -81,7 +80,12 @@ const BookedProject = () => {
           lg:h-[38.4px] lg:text-[12.8px] xl:mt-[24px]
           xl:h-[48px] xl:text-[16px]"
           pulseColor="white"
-          onClick={() => router.push("/booktype")}
+          onClick={() =>
+            push({
+              pathname: "/[studio]/booktype",
+              query: { studio: query.studio },
+            })
+          }
         >
           Back to the Studio
         </Button>

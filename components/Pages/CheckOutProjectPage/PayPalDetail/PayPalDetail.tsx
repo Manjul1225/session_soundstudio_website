@@ -1,17 +1,14 @@
 import { PayPalButtons } from "@paypal/react-paypal-js"
-import { useCheckOutSession } from "@/providers/CheckOutSessionProvider"
+import { useCheckOutProject } from "@/providers/CheckOutProjectProvider"
 import { usePayment } from "@/providers/PaymentProvider"
-import useIsMobile from "@/hooks/useIsMobile"
-import convertTimeFormat from "@/lib/convertTimeFormat"
 import { STEPS } from "@/lib/consts/checkout"
 import getSessionFee from "@/lib/getSessionFee"
 import BackwardButton from "@/components/BackwardButton"
 
 const PayPalDetail = () => {
-  const { bookSession, sessionData, setCurStep, setLoading } = useCheckOutSession()
+  const { startProject, projectData, setCurStep, setLoading } = useCheckOutProject()
   const { onPayPalCreateOrder, onPayPalApproveOrder } = usePayment()
-  const isMobile = useIsMobile()
-  const sessionFee = getSessionFee(sessionData.sessionPrice, sessionData.engineerPrice)
+  const sessionFee = getSessionFee(projectData.projectPrice, 0)
 
   const handleBackward = () => {
     setCurStep(STEPS.PAYMENT_CHECKOUT)
@@ -30,7 +27,7 @@ const PayPalDetail = () => {
       <div
         className="aspect-[1/1] rounded-[24px] bg-cover bg-center"
         style={{
-          backgroundImage: `url('${sessionData.studio.photo}')`,
+          backgroundImage: `url('/images/BookProject/lady-studio-opacity.png')`,
         }}
       />
       <div className="col-span-1 flex flex-col justify-center">
@@ -38,23 +35,19 @@ const PayPalDetail = () => {
           className="font-urwgeometric text-[32px] leading-[130%] text-gray_1 
         md:text-[28.8px] lg:text-[38.4px] xl:text-[48px]"
         >
-          {sessionData.studio.name}
+          {projectData.projectName}
         </p>
         <p
           className="py-[10px] font-urwgeometric_medium text-[24px] leading-[100%] text-[#a1ea04] drop-shadow-xl
           drop-shadow-session md:py-[20px] md:text-[19px] lg:text-[25px] xl:text-[32px]"
         >
-          {`$${sessionData.engineerPrice + sessionData.sessionPrice + sessionFee}`}
+          {`$${projectData.projectPrice + sessionFee}`}
         </p>
         <p
           className="pb-[20px] font-urwgeometric text-[16px] leading-[100%]
           text-gray_1 md:text-[28.8px] lg:text-[38.4px] xl:text-[18px]"
         >
-          {new Date(sessionData.event.start.dateTime).toDateString()}{" "}
-          {convertTimeFormat(sessionData.event.start.dateTime)}
-          {isMobile ? <br /> : <>&nbsp; -</>}{" "}
-          {new Date(sessionData.event.end.dateTime).toDateString()}{" "}
-          {convertTimeFormat(sessionData.event.end.dateTime)}
+          {projectData.timeframe.label}
         </p>
         <PayPalButtons
           style={{
@@ -67,7 +60,7 @@ const PayPalDetail = () => {
             disableMaxWidth: false,
           }}
           createOrder={(data, actions) => onPayPalCreateOrder(data, actions)}
-          onApprove={(data, actions) => onPayPalApproveOrder(data, actions, bookSession)}
+          onApprove={(data, actions) => onPayPalApproveOrder(data, actions, startProject)}
         />
       </div>
     </div>

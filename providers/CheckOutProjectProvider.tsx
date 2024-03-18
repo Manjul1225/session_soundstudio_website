@@ -16,12 +16,16 @@ const CheckOutProjectProvider = ({ children }) => {
   const router = useRouter()
   const projectId = router.query.id
 
+  const startProject = async () => {
+    setCurStep(STEPS.BOOKED_SUCCESS)
+  }
+
   const getProjectData = useCallback(async () => {
     if (!projectId) return
     const response: any = await getProjectByRequestId(projectId)
     if (response.error) {
       toast.error("project data is not existed!")
-      router.push("/booktype")
+      router.push("/Studio B/booktype")
       return
     }
 
@@ -41,8 +45,9 @@ const CheckOutProjectProvider = ({ children }) => {
       projectData,
       loading,
       setLoading,
+      startProject,
     }),
-    [curStep, setCurStep, setSelectedPayment, selectedPayment, projectData, loading],
+    [curStep, setCurStep, setSelectedPayment, selectedPayment, projectData, loading, startProject],
   )
 
   return <CheckOutProjectContext.Provider value={value}>{children}</CheckOutProjectContext.Provider>

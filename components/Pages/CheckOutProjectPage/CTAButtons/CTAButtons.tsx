@@ -2,7 +2,7 @@ import { useEffect, useState } from "react"
 import { useInView } from "react-intersection-observer"
 import Button from "@/shared/Button"
 import useIsMobile from "@/hooks/useIsMobile"
-import BookSessionButton from "../BookSessionButton"
+import StartProjectButton from "../StartProjectButton"
 
 const CTAButtons = () => {
   const [ref, inView] = useInView()
@@ -22,10 +22,10 @@ const CTAButtons = () => {
   return (
     <>
       <div ref={ref}>
-        <BookSessionButton />
+        <StartProjectButton />
       </div>
       <Button
-        id="book-session"
+        id="book-project"
         type="button"
         className="h-[48px] w-full border-x-[1px] border-b-[2px] border-x-gray_overlay_6 border-b-gray_overlay_6 bg-gray_overlay_6 !bg-none
                                             font-urwgeometric_bold text-s_error
@@ -36,14 +36,14 @@ const CTAButtons = () => {
         pulseColor="white"
         bgVariant="primary"
       >
-        Cancel Session
+        Cancel Project
       </Button>
       {isVisibleSticky && isMobile && (
         <div
           className="fixed bottom-0 left-0 z-[100] w-screen bg-black_0 px-[30px]
                 py-[20px] shadow-[12px_12px_32px_0px_#15151499,-12px_-12px_32px_0px_#40403b33]"
         >
-          <BookSessionButton />
+          <StartProjectButton />
         </div>
       )}
     </>
