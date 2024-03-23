@@ -4,6 +4,7 @@ import getSessionRequests from "@/lib/firebase/getSessionRequests"
 import sendSessionDeclined from "@/lib/sendSessionDeclined"
 import addToSessionCalendar from "@/lib/addToSessionCalendar"
 import updateSessionRequest from "@/lib/firebase/updateSessionRequest"
+import { DEFAULT_STUDIO_ID } from "@/lib/consts/global"
 
 export enum SESSION_REQUEST_STATUS {
   INITIAL = "INITIAL",
@@ -23,10 +24,14 @@ const SessionRequestProvider = ({ children }) => {
   const [selectedRequest, setSelectedRequest] = useState(null)
 
   const fetchSessionRequests = async () => {
-    const newSessionRequests = await getSessionRequests()
+    const studioId = DEFAULT_STUDIO_ID
+    const newSessionRequests: any = await getSessionRequests(studioId)
     if ("error" in newSessionRequests) {
       return
     }
+
+    newSessionRequests.sort((a, b) => (a.event.start.dateTime < b.event.start.dateTime ? -1 : 1))
+
     setSessionRequests(newSessionRequests)
   }
 
@@ -38,23 +43,33 @@ const SessionRequestProvider = ({ children }) => {
     }
   }
 
-  const handleAccept = async (request) => {
-    updateSessionRequest({
-      id: request.id,
-      sessionPrice,
-      engineerPrice,
-      studioNotes,
-    })
-    const startDateTime = request.event.start.dateTime
-    const endDateTime = request.event.end.dateTime
-    const response = await Promise.all([
-      await addToSessionCalendar(startDateTime, endDateTime, request.studio.calendarEmail),
-      await addToSessionCalendar(startDateTime, endDateTime, request.email),
-    ])
+  const handleAccept = async (request, type) => {
+    if (type === "free") {
+      updateSessionRequest({
+        id: request.id,
+        studioNotes,
+        booked: true,
+      })
+      const startDateTime = request.event.start.dateTime
+      const endDateTime = request.event.end.dateTime
+      const response = await addToSessionCalendar(
+        startDateTime,
+        endDateTime,
+        request.studio.calendarEmail,
+      )
 
-    if (response[0].error || response[1].error) {
-      toast.error("add event to calendar failed")
+      if (response.error) {
+        toast.error("add event to calendar failed")
+      } else {
+        toast.success("Accepted Request")
+      }
     } else {
+      updateSessionRequest({
+        id: request.id,
+        sessionPrice,
+        engineerPrice,
+        studioNotes,
+      })
       toast.success("Accepted Request")
     }
   }

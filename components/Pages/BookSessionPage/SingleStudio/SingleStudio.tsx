@@ -9,13 +9,14 @@ import HourMin from "../HourMin"
 import StudioName from "../StudioName"
 
 const SingleStudio = ({ className = "", data, hasEquipmentButton = false }) => {
-  const { openEquipmentModal, setCurStep, setSelectedRoom, setLoading } = useBookSession()
+  const { openEquipmentModal, setCurStep, setSelectedRoom, setLoading, selectedStudio } =
+    useBookSession()
   const { fetchSessionCalendarEvents } = useDateSelect()
 
   const handleClick = async () => {
     setLoading(true)
     setSelectedRoom(data)
-    await fetchSessionCalendarEvents(data?.calendarEmail)
+    await fetchSessionCalendarEvents(selectedStudio?.calendarEmail)
     setCurStep(STEPS.CHOOSE_DATE)
     setLoading(false)
   }
@@ -68,7 +69,7 @@ const SingleStudio = ({ className = "", data, hasEquipmentButton = false }) => {
       >
         <StudioName name={data?.name} />
         <div className="flex items-center gap-x-[10px] md:gap-x-[6px] lg:gap-x-[8px] xl:gap-x-[10px]">
-          <HourMin />
+          <HourMin minimumHours={data?.minimumHours} />
           {hasEquipmentButton && (
             <Button
               id="see-equipment"

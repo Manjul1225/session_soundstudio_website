@@ -47,7 +47,7 @@ export default function StudioDetail({ request }) {
           <div className="relative z-[2] flex grow flex-col justify-end">
             <ClipSpan className="!py-0 font-urwgeometric text-[14px]">Sound Studios</ClipSpan>
             <p className="mt-[-5px] font-urwgeometric_semibold text-[24px] text-gray_1">
-              {request.studio.name}
+              {request.roomName}
             </p>
             <div className="ml-[-5px] mt-[-5px] flex items-center">
               <Media
@@ -57,7 +57,7 @@ export default function StudioDetail({ request }) {
                 containerClasses="w-[24px] h-[23px]"
               />
               <p className="font-urwgeometric_medium text-[12px] text-gray_1">
-                {request.studio.capacity}
+                {request.room?.capacity}
               </p>
             </div>
           </div>

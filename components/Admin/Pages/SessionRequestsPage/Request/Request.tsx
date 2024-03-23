@@ -5,10 +5,12 @@ import Media from "@/shared/Media"
 import getMonthName from "@/lib/getMonthName"
 import convertTimeFormat from "@/lib/convertTimeFormat"
 import getWeekDay from "@/lib/getWeekDay"
+import checkPayment from "@/lib/checkPayment"
 import RequestDetailModal from "../RequestDetailModal"
 
 const Request = ({ request }) => {
   const [isOpenDetailModal, setIsOpenDetailModal] = useState(false)
+  const pendingPayment = checkPayment(request)
 
   return (
     <>
@@ -41,9 +43,7 @@ const Request = ({ request }) => {
           <div className="relative z-20 h-0.5 w-full bg-gray_overlay_3" />
           <div className="relative z-20 flex w-full items-center justify-between">
             <div>
-              <p className="font-urwgeometric_semibold text-2xl text-gray_1">
-                {request.studio.name}
-              </p>
+              <p className="font-urwgeometric_semibold text-2xl text-gray_1">{request.roomName}</p>
               <div className="flex items-center">
                 <Media
                   type="image"
@@ -74,7 +74,7 @@ const Request = ({ request }) => {
             </div>
           </div>
         </div>
-        <div className="flex h-full w-1/4 max-w-48 items-center justify-center bg-gray_overlay_3 p-4">
+        <div className="flex h-full w-1/4 max-w-48 flex-col items-center justify-center gap-[4px] bg-gray_overlay_3 p-4 text-center">
           <Button
             id="see-details"
             type="button"
@@ -89,6 +89,9 @@ const Request = ({ request }) => {
               See Details
             </p>
           </Button>
+          {pendingPayment && (
+            <p className="font-urwgeometric text-base leading-none text-gray_1">Pending Payment</p>
+          )}
         </div>
       </div>
       <RequestDetailModal

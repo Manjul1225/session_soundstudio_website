@@ -2,18 +2,18 @@ import { createContext, useContext, useState, useMemo, useCallback, useEffect } 
 import { useRouter } from "next/router"
 import { toast } from "react-toastify"
 import { STEPS } from "@/lib/consts/checkout"
+import { DEFAULT_STUDIO_ID } from "@/lib/consts/global"
 import getSessionByRequestId from "@/lib/firebase/getSessionByRequestId"
 import addToSessionCalendar from "@/lib/addToSessionCalendar"
-import { useCalendar } from "./CalendarProvider"
+import deleteRequest from "@/lib/firebase/deleteRequest"
+import updateSessionRequest from "@/lib/firebase/updateSessionRequest"
 
 const CheckOutSessionContext = createContext(null)
 
 const CheckOutSessionProvider = ({ children }) => {
   const [curStep, setCurStep] = useState(STEPS.PAYMENT_CHECKOUT)
   const [sessionData, setSessionData] = useState(null)
-  const [studioCalendarTimeZone, setStudioCalendarTimeZone] = useState(null)
   const router = useRouter()
-  const { addEventToCalendar } = useCalendar()
   const [loading, setLoading] = useState(false)
 
   const sessionId = router.query.id
@@ -33,41 +33,29 @@ const CheckOutSessionProvider = ({ children }) => {
       setLoading(false)
       return
     }
-    setStudioCalendarTimeZone(response)
+
+    updateSessionRequest({
+      id: sessionData.id,
+      sessionPrice: sessionData.sessionPrice,
+      engineerPrice: sessionData.engineerPrice,
+      studioNotes: sessionData.studioNotes,
+      booked: true,
+    })
     setLoading(false)
     setCurStep(STEPS.BOOKED_SUCCESS)
   }
 
-  const addToCalendar = async () => {
-    setLoading(true)
-    const startDateTime = sessionData.event.start.dateTime
-    const endDateTime = sessionData.event.end.dateTime
-
-    const response: any = await addEventToCalendar(
-      startDateTime,
-      endDateTime,
-      studioCalendarTimeZone,
-    )
-
-    if (response?.error) {
-      setLoading(false)
-      return
-    }
-    setLoading(false)
-
-    if (!response) {
-      toast.error("add event failed")
-      return
-    }
-    router.push("/Studio B/booktype")
+  const cancelSession = async () => {
+    await deleteRequest(sessionId)
+    setCurStep(STEPS.CANCEL_REQUEST)
   }
 
   const getSessionData = useCallback(async () => {
     if (!sessionId) return
     const response: any = await getSessionByRequestId(sessionId)
     if (response.error) {
-      toast.error("session data is not existed!")
-      router.push("/Studio B/booktype")
+      toast.error("session data does not exist.")
+      router.push(`/${DEFAULT_STUDIO_ID}/booktype`)
       return
     }
 
@@ -84,11 +72,11 @@ const CheckOutSessionProvider = ({ children }) => {
       setCurStep,
       sessionData,
       bookSession,
-      addToCalendar,
+      cancelSession,
       loading,
       setLoading,
     }),
-    [curStep, setCurStep, sessionData, bookSession],
+    [curStep, setCurStep, sessionData, bookSession, cancelSession],
   )
 
   return <CheckOutSessionContext.Provider value={value}>{children}</CheckOutSessionContext.Provider>

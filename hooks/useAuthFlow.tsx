@@ -8,6 +8,7 @@ import { auth } from "@/lib/firebase/db"
 import handleTxError from "@/lib/handleTxError"
 import { STATUS } from "@/lib/consts/authStatus"
 import { STEPS } from "@/lib/consts/authStep"
+import { DEFAULT_STUDIO_ID } from "@/lib/consts/global"
 import getUserDataByEmail from "@/lib/firebase/getUserDataByEmail"
 import createUserFromCredential from "@/lib/createUserFromCredential"
 import useSocialLogin from "./useSocialLogin"
@@ -32,6 +33,19 @@ const useAuthFlow = () => {
   const isResetPage = pathname.includes("/forgotpass")
 
   const isAuthenticated = userData
+
+  const initStep = () => {
+    if (isResetPage) {
+      setCurStep(STEPS.INPUT_EMAIL)
+      return
+    }
+    if (isMobile) {
+      setCurStep(STEPS.LANDING)
+    } else {
+      if (isSignInPage) setCurStep(STEPS.INPUT_EMAIL_PASSWORD)
+      if (isSignUpPage) setCurStep(STEPS.INPUT_EMAIL)
+    }
+  }
 
   const updatePassword = async () => {
     const response: any = await sendResetPassLink(userEmail)
@@ -68,22 +82,9 @@ const useAuthFlow = () => {
     const response: any = await userLogin(userEmail, userPassword)
     if (!response?.error) {
       toast.success("Sign in successful")
-      push("/Studio B/booktype")
+      push(`/${DEFAULT_STUDIO_ID}/booktype`)
     }
     setLoading(false)
-  }
-
-  const initStep = () => {
-    if (isResetPage) {
-      setCurStep(STEPS.INPUT_EMAIL)
-      return
-    }
-    if (isMobile) {
-      setCurStep(STEPS.LANDING)
-    } else {
-      if (isSignInPage) setCurStep(STEPS.INPUT_EMAIL_PASSWORD)
-      if (isSignUpPage) setCurStep(STEPS.INPUT_EMAIL)
-    }
   }
 
   const logout = () => {
