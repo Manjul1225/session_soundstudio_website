@@ -1,10 +1,12 @@
 import { createContext, useContext, useState, useMemo, useEffect } from "react"
 import { toast } from "react-toastify"
 import getSessionRequests from "@/lib/firebase/getSessionRequests"
+import updateSessionRequest from "@/lib/firebase/updateSessionRequest"
+import getRoomsByStudioId from "@/lib/firebase/getRoomsByStudioId"
 import sendSessionDeclined from "@/lib/sendSessionDeclined"
 import addToSessionCalendar from "@/lib/addToSessionCalendar"
-import updateSessionRequest from "@/lib/firebase/updateSessionRequest"
 import { DEFAULT_STUDIO_ID } from "@/lib/consts/global"
+import { useAuth } from "./AuthProvider"
 
 export enum SESSION_REQUEST_STATUS {
   INITIAL = "INITIAL",
@@ -22,9 +24,12 @@ const SessionRequestProvider = ({ children }) => {
   const [sessionRequests, setSessionRequests] = useState([])
   const [studioNotes, setStudioNotes] = useState("")
   const [selectedRequest, setSelectedRequest] = useState(null)
+  const [selectedRoom, setSelectedRoom] = useState(null)
+  const [roomList, setRoomList] = useState([]) as any
+  const { userData } = useAuth()
 
-  const fetchSessionRequests = async () => {
-    const studioId = DEFAULT_STUDIO_ID
+  const fetchSessionRequests = async (roomName) => {
+    const studioId = userData?.studioId || DEFAULT_STUDIO_ID
     const newSessionRequests: any = await getSessionRequests(studioId)
     if ("error" in newSessionRequests) {
       return
@@ -32,14 +37,14 @@ const SessionRequestProvider = ({ children }) => {
 
     newSessionRequests.sort((a, b) => (a.event.start.dateTime < b.event.start.dateTime ? -1 : 1))
 
-    setSessionRequests(newSessionRequests)
+    setSessionRequests(newSessionRequests.filter((request) => request.roomName === roomName))
   }
 
   const handleDecline = async (request) => {
     const response: any = await sendSessionDeclined({ request, studioNotes })
     if (response.status === 200) {
       toast.success("Declined Request")
-      fetchSessionRequests()
+      fetchSessionRequests(selectedRoom.name)
     }
   }
 
@@ -75,8 +80,24 @@ const SessionRequestProvider = ({ children }) => {
   }
 
   useEffect(() => {
-    fetchSessionRequests()
+    const init = async () => {
+      const studioId = userData?.studioId || DEFAULT_STUDIO_ID
+      const response = await getRoomsByStudioId(studioId)
+      const { error } = response as any
+
+      if (error) return
+
+      setRoomList(response)
+      setSelectedRoom(response[0])
+      fetchSessionRequests(response[0].name)
+    }
+
+    init()
   }, [])
+
+  useEffect(() => {
+    fetchSessionRequests(selectedRoom?.name)
+  }, [selectedRoom])
 
   const value = useMemo(
     () => ({
@@ -91,9 +112,11 @@ const SessionRequestProvider = ({ children }) => {
       selectedRequest,
       setSelectedRequest,
       sessionRequests,
+      setSelectedRoom,
+      selectedRoom,
+      roomList,
       handleDecline,
       handleAccept,
-      fetchSessionRequests,
     }),
     [
       confirmStatus,
@@ -107,9 +130,11 @@ const SessionRequestProvider = ({ children }) => {
       selectedRequest,
       setSelectedRequest,
       sessionRequests,
+      setSelectedRoom,
+      selectedRoom,
+      roomList,
       handleDecline,
       handleAccept,
-      fetchSessionRequests,
     ],
   )
 

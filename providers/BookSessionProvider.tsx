@@ -6,6 +6,7 @@ import convertDecimalDigit from "@/lib/convetDecimalDigit"
 import convertTo24HourFormat from "@/lib/convertTo24HourFormat"
 import requestSession from "@/lib/firebase/requestSession"
 import getStudioByStudioId from "@/lib/firebase/getStudioByStudioId"
+import getProjectByUser from "@/lib/firebase/getProjectByUser"
 import { ONE_DAY_MILLISECONDS } from "@/lib/consts/global"
 import { useAuth } from "./AuthProvider"
 import useInstruments from "../hooks/useInstruments"
@@ -19,6 +20,7 @@ const BookSessionProvider = ({ children }) => {
   const [isOpenEquipmentModal, setIsOpenEquipmentModal] = useState(false)
   const [selectedStudio, setSelectedStudio] = useState(null)
   const [selectedRoom, setSelectedRoom] = useState(null)
+  const [activeProject, setActiveProject] = useState<any>({})
   const [sessionDetail, setSessionDetail] = useState("")
   const [comingPeople, setComingPeople] = useState(1)
   const [isEngineerNeeded, setIsEngineerNeeded] = useState(true)
@@ -31,7 +33,7 @@ const BookSessionProvider = ({ children }) => {
   const { query, push } = useRouter()
   const studioId = query.studio
 
-  const request = async (startTime, endTime, selectedDay, roomName) => {
+  const request = async ({ startTime, endTime, selectedDay, roomName, projectId }) => {
     setLoading(true)
     const startDate = `${selectedDay.year}-${convertDecimalDigit(
       selectedDay.month,
@@ -74,6 +76,7 @@ const BookSessionProvider = ({ children }) => {
       studioId,
       roomName,
       pfp: userData?.photoURL,
+      projectId,
     })
 
     if (response.error) {
@@ -94,15 +97,17 @@ const BookSessionProvider = ({ children }) => {
     const response: any = await getStudioByStudioId(studioId)
     if (response.error) {
       toast.error("studio data does not exist.")
-      push({
-        pathname: "/[studio]/booktype",
-        query: { studio: query.studio },
-      })
+      push(`/${query.studio}/booktype`)
       return
     }
 
+    if (userData) {
+      const project = await getProjectByUser({ studioId, email: userData.email })
+      if (project.length > 0) setActiveProject(project[0])
+    }
+
     setSelectedStudio(response)
-  }, [studioId])
+  }, [studioId, userData, query, push])
 
   useEffect(() => {
     getStudioData()
@@ -120,6 +125,7 @@ const BookSessionProvider = ({ children }) => {
       openEquipmentModal,
       selectedStudio,
       selectedRoom,
+      activeProject,
       setSelectedRoom,
       sessionDetail,
       setSessionDetail,
@@ -146,6 +152,7 @@ const BookSessionProvider = ({ children }) => {
       openEquipmentModal,
       selectedStudio,
       selectedRoom,
+      activeProject,
       setSelectedRoom,
       sessionDetail,
       setSessionDetail,

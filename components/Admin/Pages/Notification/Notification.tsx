@@ -1,29 +1,15 @@
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import Icon from "@/components/ui/Icon"
 import SideModal from "../../../SideModal"
 import Notifications from "./Notifications"
+import LocalDateTime from "./DateTime"
 
 const Notification = () => {
   const [isOpenNotificationModal, setIsOpenNotificationModal] = useState(false)
-  const [localTime, setLocalTime] = useState(new Date().toLocaleTimeString());
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setLocalTime(new Date().toLocaleTimeString());
-    }, 1000);
-
-    return () => clearInterval(interval);
-  }, []);
 
   return (
     <div className="flex w-full items-center justify-end gap-x-[24px] py-[24px]">
-      <div className="flex items-center gap-x-[10px]">
-        <p className="pb-[4px] font-urwgeometric_bold text-[12px] text-gray_2">
-          July, <span className="text-gray_1">24</span>
-        </p>
-        <div className="size-[8px] rounded-full bg-gradient_s_1" />
-        <p className="pb-[4px] font-urwgeometric_bold text-[12px] text-gray_1">{localTime}</p>
-      </div>
+      <LocalDateTime />
       <button
         type="button"
         className="relative flex size-[44px] items-center justify-center
