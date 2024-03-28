@@ -3,11 +3,13 @@ import sendEmail from "@/lib/sendEmail"
 import { DeclineSessionDTO } from "@/DTO/declinesession.dto"
 import deleteRequest from "@/lib/firebase/deleteRequest"
 import { SESSION_EMAIL, declineSessionMail } from "@/lib/consts/mail"
+import getStudioImageFromURL from "@/lib/getStudioImageFromURL"
 
 class sendDeclinedSession {
   @Post()
   async sendDeclinedSession(@Body() body: DeclineSessionDTO) {
     const { request, studioNotes } = body
+    const studioImage = getStudioImageFromURL(request?.studio)
 
     const personalizations = [
       {
@@ -21,7 +23,7 @@ class sendDeclinedSession {
       content: [
         {
           type: "text/html",
-          value: declineSessionMail(studioNotes),
+          value: declineSessionMail(studioNotes, studioImage),
         },
       ],
       from: {

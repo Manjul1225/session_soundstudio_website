@@ -6,11 +6,13 @@ import getMonthName from "@/lib/getMonthName"
 import getWeekDay from "@/lib/getWeekDay"
 import convertTimeFormat from "@/lib/convertTimeFormat"
 import convertCalendarEventDateTime from "@/lib/convertCalendarEventDateTime"
+import getStudioImageFromURL from "@/lib/getStudioImageFromURL"
 
 class sendAcceptedSession {
   @Post()
   async sendAcceptedSession(@Body() body: AccpetSessionDTO) {
     const { request, studioNotes, type } = body
+    const studioImage = getStudioImageFromURL(request?.studio)
 
     const emailData = {
       requestId: request.id,
@@ -21,6 +23,7 @@ class sendAcceptedSession {
         request.event.end.dateTime,
       )}`,
       studioName: request.roomName,
+      studioImage,
       comingPeople: request.comingPeople,
       studioNotes,
       calendarLink: `https://calendar.google.com/calendar/event?action=TEMPLATE&dates=${convertCalendarEventDateTime(
