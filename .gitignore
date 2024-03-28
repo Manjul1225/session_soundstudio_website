@@ -39,10 +39,10 @@ utils/db/serviceAccountKey.json
 *.tsbuildinfo
 
 # ENV
-.env
-.env.*
-.env.local
-.env.production
+# .env
+# .env.*
+# .env.local
+# .env.production
 
 # Testing
 pages/api/temp.ts
